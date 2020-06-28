@@ -26,11 +26,11 @@ process map_and_sort {
 
 	output:
 	file "${params.samplename}.sorted.bam" into bamfile_ch
+	file "${params.samplename}.sorted.bai" into bamindex_ch
 	
 	"""
 	bwa mem -t 6 -M -R '@RG\\tID:${params.readgroup}\\tSM:${params.samplename}\\tPL:ILLUMINA' $params.reference $reads \
-	| gatk SortSam -I /dev/stdin -O ${params.samplename}.sorted.bam --SORT_ORDER=coordinate
-
+	| gatk SortSam -I /dev/stdin -O ${params.samplename}.sorted.bam --SORT_ORDER=coordinate --CREATE_INDEX=true
 	"""	
 }
 
@@ -90,18 +90,66 @@ process apply_bqsr {
 }
 
 process call_haplotypes {
-	publishDir "${params.outdir}/${params.samplename}", mode: 'copy'
+	publishDir "${params.outdir}/${params.samplename}"
 
 	input:
 	file dedup_recal_file from dedup_recal_ch
 
 	output:
 	file "result_${params.samplename}.vcf" into vcf_ch
+	file "${params.samplename}_bamout.bam" into bamout_ch
 
 	script:
 	"""
 	gatk HaplotypeCaller --input $dedup_recal_file --output result_${params.samplename}.vcf \
-	--reference ${params.reference}
+	--reference ${params.reference} --bamout ${params.samplename}_bamout.bam
+	"""
+}
+
+process cnn_score_variants {
+	publishDir "${params.outdir}/${params.samplename}", mode: 'copy'
+
+	input:
+	file vcf from vcf_ch
+	file bamout from bamout_ch
+
+	output:
+	file "result_cnn2d_${params.samplename}.vcf" into vcf_cnn2d_ch
+
+
+	script:
+	"""
+	gatk CNNScoreVariants \
+		-R ${params.reference} \
+		-I $bamout \
+		-V $vcf \
+		-O result_cnn2d_${params.samplename}.vcf \
+		--tensor-type read_tensor
+	"""
+}
+
+
+process filter_variants {
+	publishDir "${params.outdir}/${params.samplename}", mode: 'copy'
+
+	input:
+	file vcf_cnn2d from vcf_cnn2d_ch
+	
+
+	output:
+	file "result_cnn2d_filtered_${params.samplename}.vcf" into vcf_cnn2d_filtered_ch
+
+
+	script:
+	"""
+	gatk FilterVariantTranches \
+	  -V $vcf_cnn2d \
+	  -O result_cnn2d_filtered_${params.samplename}.vcf \
+	  --resource ~/hg38/1000G_omni2.5.hg38.vcf.gz \
+	  --resource ~/hg38/hapmap_3.3.hg38.vcf.gz \
+	  --info-key CNN_2D \
+	  --snp-tranche 99.9 \
+	  --indel-tranche 95.0
 	"""
 }
 

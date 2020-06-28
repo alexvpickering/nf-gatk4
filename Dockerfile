@@ -17,3 +17,9 @@ RUN apt-get update && apt-get install bwa=0.7.12-5
 
 RUN cd ~/hg38 \
     && wget https://storage.googleapis.com/genomics-public-data/references/hg38/v0/Homo_sapiens_assembly38.known_indels.vcf.gz.tbi
+
+RUN cd ~/hg38 \
+    && wget https://storage.googleapis.com/genomics-public-data/references/hg38/v0/1000G_omni2.5.hg38.vcf.gz \
+    && wget https://storage.googleapis.com/genomics-public-data/references/hg38/v0/1000G_omni2.5.hg38.vcf.gz.tbi \
+    && wget https://storage.googleapis.com/genomics-public-data/references/hg38/v0/hapmap_3.3.hg38.vcf.gz \
+    && wget https://storage.googleapis.com/genomics-public-data/references/hg38/v0/hapmap_3.3.hg38.vcf.gz.tbi
