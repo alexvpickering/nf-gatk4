@@ -153,3 +153,22 @@ process filter_variants {
 	"""
 }
 
+process annotate_csq {
+	publishDir "${params.outdir}/${params.samplename}", mode: 'copy'
+
+	input:
+	file vcf_cnn2d_filtered from vcf_cnn2d_filtered_ch
+	
+
+	output:
+	file "result_cnn2d_filtered_csq_${params.samplename}.bcf" into vcf_cnn2d_filtered_csq_ch
+
+
+	script:
+	"""
+	bcftools csq -f ${params.reference} \
+	 -g ~/hg38/Homo_sapiens.GRCh38.100.gff3.gz \
+	  $vcf_cnn2d_filtered -Ob -o result_cnn2d_filtered_csq_${params.samplename}.bcf
+	"""
+}
+

@@ -23,3 +23,18 @@ RUN cd ~/hg38 \
     && wget https://storage.googleapis.com/genomics-public-data/references/hg38/v0/1000G_omni2.5.hg38.vcf.gz.tbi \
     && wget https://storage.googleapis.com/genomics-public-data/references/hg38/v0/hapmap_3.3.hg38.vcf.gz \
     && wget https://storage.googleapis.com/genomics-public-data/references/hg38/v0/hapmap_3.3.hg38.vcf.gz.tbi
+
+RUN cd ~/hg38 \
+    && wget ftp://ftp.ensembl.org/pub/current_gff3/homo_sapiens/Homo_sapiens.GRCh38.100.gff3.gz
+
+RUN apt update \
+    && apt-get install libcurl4-openssl-dev -y \
+    && apt-get install git -y
+
+RUN cd /tmp \
+    && git clone git://github.com/samtools/htslib.git \
+    && cd htslib && git reset --hard 3d55140fead0a42762abc7c62032e3ee1265f30f \
+    && git clone git://github.com/samtools/bcftools.git \
+    && cd bcftools  && git reset --hard e313e0f964c18c93f85fe1011e4d34b548802316 \
+    && make \
+    && make install
