@@ -34,6 +34,7 @@ RUN apt update \
 RUN cd /tmp \
     && git clone git://github.com/samtools/htslib.git \
     && cd htslib && git reset --hard 3d55140fead0a42762abc7c62032e3ee1265f30f \
+    && cd /tmp \
     && git clone git://github.com/samtools/bcftools.git \
     && cd bcftools  && git reset --hard e313e0f964c18c93f85fe1011e4d34b548802316 \
     && make \
