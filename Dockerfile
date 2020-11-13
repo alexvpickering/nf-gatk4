@@ -25,9 +25,9 @@ RUN cd ~/hg38 \
     && wget https://storage.googleapis.com/genomics-public-data/references/hg38/v0/hapmap_3.3.hg38.vcf.gz.tbi
 
 RUN cd ~/hg38 \
-    && wget ftp://ftp.ensembl.org/pub/current_gff3/homo_sapiens/Homo_sapiens.GRCh38.100.gff3.gz
+    && wget ftp://ftp.ensembl.org/pub/release-100/gff3/homo_sapiens/Homo_sapiens.GRCh38.100.gff3.gz
 
-RUN apt update \
+RUN apt-get update \
     && apt-get install libcurl4-openssl-dev -y \
     && apt-get install git -y
 
